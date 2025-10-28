@@ -1,0 +1,42 @@
+[
+    {
+        "Name": "aioffice-net",
+        "Id": "ebbacee5714ff2acde1848bcfb0f20dc7ad41b2a3786660f408d48e4ca5325f4",
+        "Created": "2025-10-26T13:38:54.424173043Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv4": true,
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "0dca56691a2f62946afb2c1bb436cb6ba4b96a17e413f1aafbd58c7f6e84c1d8": {
+                "Name": "aioffice-redis",
+                "EndpointID": "a54c32f7a751393457aacb0abc6867d1f5748ef08ddf19c6e54f53b5d57eb35b",
+                "MacAddress": "06:9a:43:84:c0:90",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.enable_ipv4": "true",
+            "com.docker.network.enable_ipv6": "false"
+        },
+        "Labels": {}
+    }
+]

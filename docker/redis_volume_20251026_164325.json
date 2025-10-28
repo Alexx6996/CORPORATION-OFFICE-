@@ -1,0 +1,11 @@
+[
+    {
+        "CreatedAt": "2025-10-26T13:39:43Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/aioffice-redis-data/_data",
+        "Name": "aioffice-redis-data",
+        "Options": null,
+        "Scope": "local"
+    }
+]
