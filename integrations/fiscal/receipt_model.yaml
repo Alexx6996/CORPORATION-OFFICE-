@@ -1,0 +1,45 @@
+# Базовая модель «чека» для фискализации (draft)
+version: "1.0"
+
+receipt:
+  id: "test-receipt-0001"
+  issue_datetime: "2025-01-01T12:00:00+03:00"
+  currency: "RUB"
+  operation: "sell"   # sell | refund | correction
+
+  seller:
+    inn: "0000000000"
+    name: "CORPORATION / OFFICE, ИП Тест"
+    tax_system: "osn" # osn | usn_income | usn_income_outcome | patent | envd | esn
+
+  customer:
+    email: "customer@example.com"
+    phone: "+79990000000"
+
+  items:
+    - name: "Тестовая услуга"
+      quantity: 1
+      price: 1000.00
+      amount: 1000.00
+      payment_object: "service"      # товар | услуга | …
+      payment_method: "full_payment" # полная оплата, предоплата и т.д.
+      vat:
+        rate: "none"                 # none | vat0 | vat10 | vat20 | vat110 | vat120
+        amount: 0.00
+
+  totals:
+    subtotal: 1000.00
+    vat_amount: 0.00
+    grand_total: 1000.00
+
+  payments:
+    - type: "card"                   # cash | card | e-money | advance | credit | other
+      amount: 1000.00
+
+  fptr:
+    # Поля для конкретного ОФД/ККТ заполняются в интеграции провайдера
+    cashier: "system"
+    device_sn: "UNKNOWN"
+    additional_props:
+      - key: "trace_id"
+        value: "0000000000000000"

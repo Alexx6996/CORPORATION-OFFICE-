@@ -1,0 +1,21 @@
+# Bandit config for AICORPORATION/AIOFFICE
+# SAST: анализ потенциально опасных конструкций в Python.
+
+skips: []
+
+# Игнорируем автогенерируемые миграции, виртуальные окружения и кеши.
+exclude_dirs:
+  - db/migrations/versions
+  - .venv
+  - __pycache__
+
+# Минимальный уровень серьезности, о котором надо сообщать.
+# LOW/MEDIUM/HIGH — мы сразу смотрим всё, но HIGH = блокер.
+severity: LOW
+
+# Минимальная уверенность (CONFIDENCE).
+# Можно оставить LOW, чтобы видеть всё.
+confidence: LOW
+
+# NOTE:
+# Если в коде используется "# nosec", обязательно пояснить в PR почему.

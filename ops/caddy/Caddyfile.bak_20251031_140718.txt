@@ -1,0 +1,7 @@
+:80 {
+  redir https://{host}{uri} 308
+}
+:443 {
+  tls C:\Secure\TLS\fullchain.pem C:\Secure\TLS\privkey.pem
+  reverse_proxy 127.0.0.1:8181
+}

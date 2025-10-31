@@ -1,0 +1,27 @@
+# RACI матрица для CORPORATION / OFFICE
+# R=Responsible, A=Accountable, C=Consulted, I=Informed
+
+items:
+  - task: "Prod релиз (выполнение по prod_release_checklist.md)"
+    roles: { User: "R", Administrator: "A", DomainOwners: "C", Security: "I" }
+
+  - task: "Инцидент S0 (недоступность/утечка)"
+    roles: { User: "I", Administrator: "A", Security: "R", DomainOwners: "C" }
+
+  - task: "Плановая ротация секретов/сертов"
+    roles: { User: "I", Administrator: "R", Security: "A", DomainOwners: "C" }
+
+  - task: "Миграции БД (alembic upgrade head)"
+    roles: { User: "C", Administrator: "R", Security: "I", DomainOwners: "I" }
+
+  - task: "Юр-обновления (политика/оферта)"
+    roles: { User: "R", Administrator: "I", DomainOwners: "C", Security: "I" }
+
+  - task: "Изменения интеграций (платежи/фискалка)"
+    roles: { User: "R", Administrator: "C", DomainOwners: "A", Security: "I" }
+
+  - task: "DR-тест и бэкапы"
+    roles: { User: "I", Administrator: "R", Security: "C", DomainOwners: "I" }
+
+  - task: "Observability/алерты (SLO/SLA)"
+    roles: { User: "R", Administrator: "C", Security: "A", DomainOwners: "I" }

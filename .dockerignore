@@ -1,0 +1,16 @@
+# Игнорим тяжёлые/закрытые папки и мусор
+.obvenv/
+.venv/
+.git/
+__pycache__/
+node_modules/
+logs/
+observability/caddy-data/
+observability/*.log
+*.log
+*.pyc
+*.pyo
+*.pyd
+dist/
+build/
+docker-compose.staging.yml

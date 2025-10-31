@@ -1,0 +1,36 @@
+# Disaster Recovery Plan — CORPORATION / OFFICE
+
+rto_minutes: 60        # целевой максимум простоя
+rpo_minutes: 15        # допустимая потеря данных
+
+assets:
+  - name: "PostgreSQL/DB"
+    backup: "C:\\Secure\\Backups\\db\\"
+    restore_cmd: "psql < latest.sql"     # пример, уточнить для вашей БД
+  - name: "VectorStore"
+    backup: "C:\\Secure\\Backups\\vectorstore\\"
+  - name: "Artifacts"
+    backup: "C:\\Secure\\Backups\\artifacts\\"
+
+procedures:
+  detection:
+    - "Оценить инцидент (S0/S1), остановить релизы"
+  restore:
+    - "Поднять чистую среду / контейнеры"
+    - "Восстановить БД из последнего бэкапа (≤ RPO)"
+    - "Проверить /healthz, /metrics, смоки на staging"
+    - "Переключить трафик"
+  verification:
+    - "Сравнить ключевые метрики и бизнес-потоки"
+    - "Заполнить постмортем (ops/incident_postmortem_template.md)"
+
+testing:
+  cadence_days: 14
+  last_test: "2025-10-31"
+  next_test: "2025-11-14"
+
+contacts:
+  owner: "Administrator"
+  escalation: ["Security", "DomainOwners"]
+
+notes: "Фактические бэкапы хранятся на BitLocker-защищённом диске. Ключи/пароли не попадают в git."

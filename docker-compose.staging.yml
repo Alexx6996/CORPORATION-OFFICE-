@@ -1,0 +1,42 @@
+name: aioffice-staging
+
+services:
+  app:
+    container_name: aioffice-staging-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    command: >
+      python -m uvicorn apps.backend_core.main:app
+      --host 0.0.0.0 --port 8001 --log-level info
+    depends_on:
+      - redis
+    networks:
+      - aioffice-net
+    volumes:
+      - ./logs:/app/logs
+      - ./observability:/app/observability
+
+  redis:
+    image: redis:7-alpine
+    container_name: aioffice-staging-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    volumes:
+      - aioffice-staging-redis-data:/data
+    networks:
+      - aioffice-net
+
+volumes:
+  aioffice-staging-redis-data:
+
+networks:
+  aioffice-net:
+    external: true

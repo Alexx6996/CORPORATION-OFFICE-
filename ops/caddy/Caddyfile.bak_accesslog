@@ -1,0 +1,41 @@
+:80 {
+	redir https://{host}{uri} 308
+}
+:443 {
+	tls C:\Secure\TLS\fullchain.pem C:\Secure\TLS\privkey.pem
+
+	# DEV BasicAuth (временный щит)
+	basic_auth /* {
+		dev $2a$14$hMA3veYCL9Iamh3JA4VVe./1HS.CfCrBf2uPprihHOzZz.St2JhSK
+	}
+
+	# Security Headers / Hardening
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		Content-Security-Policy "default-src ''self''; img-src ''self'' data:; style-src ''self'' ''unsafe-inline''; script-src ''self''; frame-ancestors ''none''"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+		X-Request-ID "{http.request.id}"
+	}
+
+	# Разрешаем только GET/POST (все остальное 405)
+	@disallowed {
+		not method GET POST
+	}
+	handle @disallowed {
+		respond "Method Not Allowed" 405
+	}
+
+	# Лимит тела запроса
+	request_body {
+		max_size 5MB
+	}
+
+	reverse_proxy 127.0.0.1:8181 {
+		header_up X-Request-ID {http.request.id}
+		header_up Host {upstream_hostport}
+		health_uri /health
+	}
+}

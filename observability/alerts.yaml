@@ -1,0 +1,44 @@
+# Observability alerts — CORPORATION / OFFICE
+
+service: "aioffice"
+
+availability:
+  objective: 99.5
+  window_days: 30
+  alert_thresholds:
+    - level: "S0"
+      condition: "healthz_non_200_ratio > 0.05 over 5m"
+    - level: "S1"
+      condition: "healthz_non_200_ratio > 0.02 over 15m"
+
+latency:
+  p95_ms:
+    objective: 800
+    alert_thresholds:
+      - level: "S1"
+        condition: "p95_ms > 1200 over 15m"
+      - level: "S2"
+        condition: "p95_ms > 1000 over 30m"
+
+errors:
+  rate_5xx:
+    objective: 0.5   # %
+    alert_thresholds:
+      - level: "S0"
+        condition: "rate_5xx > 5 over 5m"
+      - level: "S1"
+        condition: "rate_5xx > 1 over 15m"
+
+queue:
+  redis_backlog:
+    objective_max: 1000
+    alert_thresholds:
+      - level: "S2"
+        condition: "redis_backlog > 2000 over 30m"
+
+disk:
+  free_space_gb:
+    objective_min: 10
+    alert_thresholds:
+      - level: "S1"
+        condition: "free_space_gb < 5 over 10m"

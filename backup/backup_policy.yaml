@@ -1,0 +1,32 @@
+# Backup Policy — CORPORATION / OFFICE
+
+schedule:
+  daily_time: "02:30"          # локальное время хоста
+  full_backup_day: "Sun"       # полный бэкап раз в неделю
+  verify_after_backup: true    # проверка целостности после каждого бэкапа
+
+locations:
+  root: "C:\\Secure\\Backups"
+  db: "C:\\Secure\\Backups\\db"
+  vectorstore: "C:\\Secure\\Backups\\vectorstore"
+  artifacts: "C:\\Secure\\Backups\\artifacts"
+
+retention:
+  daily_copies: 7
+  weekly_copies: 4
+  monthly_copies: 6
+
+encryption:
+  at_rest: "BitLocker drive encryption"
+  in_transit: "N/A (локальный хост)"
+  secrets_storage: "Windows Credential Manager"
+
+responsibilities:
+  owner: "Administrator"
+  verify_owner: "User"
+  escalation: ["Security"]
+
+checks:
+  - "После бэкапа: контроль размера/хэшей, лог в observability\\backup.log"
+  - "Ежемесячно: тестовое восстановление на staging (DR dry-run)"
+notes: "Фактические пароли/ключи НЕ хранятся в git. Все пути предполагают, что диск зашифрован BitLocker."

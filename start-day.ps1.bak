@@ -71,7 +71,7 @@ try {
     # порт может быть свободен, это не критическая ошибка
 }
 
-Write-Host ("Port 8181 owner PID: {0}" -f ($portOwnerPid ? $portOwnerPid : "None"))
+Write-Host ("Port 8181 owner PID: {0}" -f ($portOwnerPid ?? "None"))
 Write-Host ("Port 8181 owner Path: {0}" -f $portOwnerPath)
 Write-Host ""
 
@@ -121,13 +121,3 @@ if ($ownerOk -and $svcOk -and $versionOk) {
 
 Write-Host ""
 Write-Host "start-day done"
-
-$portPid=(Get-NetTCPConnection -LocalPort 8181 | Select-Object -First 1 -ExpandProperty OwningProcess) 2>$null
-if($portPid){
-  $proc=Get-CimInstance Win32_Process -Filter "ProcessId=$portPid"
-  $parent=Get-CimInstance Win32_Process -Filter "ProcessId=$($proc.ParentProcessId)"
-  $venv="C:\work\AICORPORATION\AIOFFICE\.venv\Scripts\python.exe"
-  if($proc.ExecutablePath -eq $venv -or $parent.ExecutablePath -eq $venv){
-    Write-Host "RESULT: OK (venv confirmed via parent)"
-  }
-}

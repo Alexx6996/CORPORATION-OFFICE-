@@ -1,0 +1,19 @@
+# CI toolchain
+ruff
+bandit
+
+# Tests
+pytest
+pytest-cov
+httpx
+
+# App deps (минимум для юнит-тестов роутеров)
+fastapi
+uvicorn
+python-jose[cryptography]
+
+pyyaml
+
+prometheus-client
+
+alembic

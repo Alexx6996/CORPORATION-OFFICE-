@@ -1,0 +1,19 @@
+version: 1
+formatters:
+  plain:
+    format: "%(message)s"
+handlers:
+  file_main:
+    class: logging.FileHandler
+    filename: logs\\aioffice.log
+    mode: a
+    encoding: utf-8
+    formatter: plain
+loggers:
+  aioffice:
+    level: INFO
+    handlers: [file_main]
+    propagate: no
+root:
+  level: INFO
+  handlers: [file_main]
