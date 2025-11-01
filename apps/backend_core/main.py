@@ -147,3 +147,10 @@ try:
 except Exception as _e:
     print(f"[fiscal-bootstrap] skipped: {_e}")
 # --- /AUTO-INJECT ---
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
