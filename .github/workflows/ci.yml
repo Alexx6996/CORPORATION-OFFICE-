@@ -184,6 +184,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
       security-events: write
     steps:
       - name: Checkout
@@ -198,6 +199,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         continue-on-error: true
         with:
+          args: --disable-telemetry
           scan-type: fs
           scan-ref: .
           format: sarif
@@ -217,4 +219,5 @@ jobs:
           name: trivy-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: trivy-image.sarif
           if-no-files-found: ignore
+
 
