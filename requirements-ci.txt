@@ -12,3 +12,5 @@ prometheus-client
 alembic
 python-jose[cryptography]
 redis
+
+requests-mock
