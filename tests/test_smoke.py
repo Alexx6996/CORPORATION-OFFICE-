@@ -7,7 +7,8 @@ def test_http_mock_example(http_mock):
     http_mock.get('https://ext.example/api/info', json={'status': 'ok', 'service': 'aioffice'}, status_code=200)
 
     import requests
-    resp = requests.get('https://ext.example/api/info')
+    resp = requests.get('https://ext.example/api/info', timeout=5)
     assert resp.status_code == 200
     data = resp.json()
     assert data['service'] == 'aioffice'
+
