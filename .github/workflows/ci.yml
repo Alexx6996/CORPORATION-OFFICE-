@@ -16,6 +16,9 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -50,6 +53,9 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     needs: test
     permissions:
       contents: read
@@ -104,6 +110,9 @@ jobs:
 
   docker-smoke:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     needs: docker-build
     steps:
       - name: Login to GHCR
@@ -160,6 +169,9 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     needs: docker-build
     permissions:
       contents: write
@@ -183,6 +195,9 @@ jobs:
     name: Trivy image scan (non-blocking)
     needs: docker-build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -199,7 +214,11 @@ jobs:
           image-ref: ghcr.io/${{ github.repository }}:latest
           format: sarif
           output: trivy-image.sarif
-          vuln-type: 'os,library'
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image.sarif
+        continue-on-error: true          vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
       - name: Upload Trivy SARIF
         uses: actions/upload-artifact@v4
@@ -207,3 +226,5 @@ jobs:
           name: trivy-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: trivy-image.sarif
           if-no-files-found: ignore
+
+
