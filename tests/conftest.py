@@ -1,4 +1,9 @@
-import os, sys
+import os
+import sys
+sys.path.insert(0, os.path.abspath("."))
+
+sys.path.insert(0, os.path.abspath("."))
+
 sys.path.insert(0, os.path.abspath("."))
 """
 AIOFFICE TEST POLICY (applies to ALL tests in this repo)
@@ -16,11 +21,6 @@ AIOFFICE TEST POLICY (applies to ALL tests in this repo)
 6. Интеграционные тесты, которые общаются с локальными компонентами (например, FastAPI app в памяти) допускаются.
    - Но нельзя дергать живую продуктивную службу, стоящую как Windows service.
 """
-
-import pytest
-import requests_mock
-
-
 @pytest.fixture
 def http_mock():
     """Глобальный мок для внешних HTTP-запросов.
@@ -32,4 +32,6 @@ def http_mock():
     """
     with requests_mock.Mocker() as m:
         yield m
+
+
 
