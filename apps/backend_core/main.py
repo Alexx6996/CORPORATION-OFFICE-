@@ -140,3 +140,10 @@ try:
 except Exception as _e:
     print(f"[metrics-bootstrap] skipped: {_e}")
 # --- /AUTO-INJECT ---
+# --- AUTO-INJECT: FISCAL ROUTER (CORPORATION / OFFICE) ---
+try:
+    from integrations.fiscal.router import router as fiscal_router  # type: ignore
+    app.include_router(fiscal_router)
+except Exception as _e:
+    print(f"[fiscal-bootstrap] skipped: {_e}")
+# --- /AUTO-INJECT ---
