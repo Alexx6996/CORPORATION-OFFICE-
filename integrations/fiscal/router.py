@@ -40,9 +40,10 @@ async def emit_receipt(
         if not isinstance(data, dict) or "receipt" not in data:
             raise ValueError("invalid receipt model")
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"receipt model error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"receipt model error: {e}") from e
 
     if req.amount <= 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="amount must be > 0")
 
     return FiscalEmitResponse(receipt_id=f"rcpt_{req.order_id}", status="created")
+
