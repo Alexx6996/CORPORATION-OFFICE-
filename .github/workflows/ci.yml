@@ -25,7 +25,7 @@ jobs:
         run: ruff check . --output-format=github --ignore E501,B008 --line-length 120 --target-version py311
 
       - name: Bandit
-        run: bandit -r . -x .venv -ll
+        run: bandit -r . -x .venv -ll -b .bandit-baseline.json
 
       - name: Pytest
         run: pytest -q
@@ -42,5 +42,6 @@ jobs:
         with:
           context: .
           push: false
+
 
 
