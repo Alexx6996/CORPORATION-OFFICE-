@@ -99,7 +99,11 @@ jobs:
       - name: Verify cosign signature (latest)
         env:
           COSIGN_EXPERIMENTAL: "true"
-        run: cosign verify ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+        run: |
+          cosign verify \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/ci.yml@.*" \
+            ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
 
       - name: Run container
         run: |
@@ -151,3 +155,4 @@ jobs:
           tag_name: v${{ steps.meta.outputs.version }}
           name: Release v${{ steps.meta.outputs.version }}
           generate_release_notes: true
+
