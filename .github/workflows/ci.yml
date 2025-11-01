@@ -9,7 +9,7 @@ permissions:
   packages: write
 
 jobs:
-test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,21 +36,27 @@ test:
   docker-build:
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Docker build (no push)
-        uses: docker/build-push-action@v6
+
+      - name: Read version (version.txt)
+        id: meta
+        shell: bash
+        run: |
+          echo "version=$(cat version.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          context: .
-          push: false
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-
-
-
-
-
-
-
-
+      - name: Build and push image
+        run: docker buildx build -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }} -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ github.sha }} --provenance=true --sbom=true --push .
