@@ -77,19 +77,16 @@ jobs:
       - name: Run container
         run: |
           docker run -d --rm --name aioffice-smoke -p 8181:8181 ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
-          sleep 5
-
+          sleep 10
       - name: Check /health
         run: |
-          curl -sf http://127.0.0.1:8181/health
-          echo "OK"
-
-      - name: Logs (last 100 lines)
-        if: always()
-        run: docker logs --tail 100 aioffice-smoke || true
-
-      - name: Stop
-        if: always()
-        run: docker stop aioffice-smoke || true
-
-
+          for i in {1..60}; do
+            if curl -sf http://127.0.0.1:8181/health > /dev/null; then
+              echo "Health OK";
+              exit 0;
+            fi
+            sleep 1
+          done
+          echo "Health check timed out"
+          docker logs --tail 200 aioffice-smoke || true
+          exit 1
