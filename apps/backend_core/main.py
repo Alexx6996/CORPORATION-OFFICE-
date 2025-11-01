@@ -11,6 +11,7 @@ START_TIME = time.time()
 app = FastAPI(title=APP_NAME)
 
 
+
 @app.get("/healthz")
 @app.get("/health")
 def _health_check():
@@ -153,4 +154,5 @@ try:
 except Exception as _e:
     print(f"[fiscal-bootstrap] skipped: {_e}")
 # --- /AUTO-INJECT ---
+
 
