@@ -8,14 +8,21 @@ permissions:
   contents: read
   packages: write
 
-concurrency:`r`n  group: ci-${{ github.ref }}`r`n  cancel-in-progress: true`r`n`r`njobs:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v5`r`n        with:`r`n          python-version: "3.11"`r`n          cache: "pip"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Install deps
         run: |
@@ -58,6 +65,7 @@ concurrency:`r`n  group: ci-${{ github.ref }}`r`n  cancel-in-progress: true`r`n`
 
       - name: Build and push image
         run: docker buildx build -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }} -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ github.sha }} --provenance=true --sbom=true --push .
+
   docker-smoke:
     runs-on: ubuntu-latest
     needs: docker-build
@@ -76,6 +84,7 @@ concurrency:`r`n  group: ci-${{ github.ref }}`r`n  cancel-in-progress: true`r`n`
         run: |
           docker run -d --rm --name aioffice-smoke -p 8181:8001 ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
           sleep 10
+
       - name: Probe health endpoints
         run: |
           endpoints=(/health /healthz /metrics)
@@ -97,5 +106,6 @@ concurrency:`r`n  group: ci-${{ github.ref }}`r`n  cancel-in-progress: true`r`n`
           docker logs --tail 200 aioffice-smoke || true
           exit 1
 
-
-
+      - name: Stop
+        if: always()
+        run: docker stop aioffice-smoke || true
