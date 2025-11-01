@@ -76,7 +76,7 @@ jobs:
 
       - name: Run container
         run: |
-          docker run -d --rm --name aioffice-smoke -p 8181:8181 ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+          docker run -d --rm --name aioffice-smoke -p 8181:8001 ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
           sleep 10
       - name: Check /health
         run: |
@@ -90,3 +90,4 @@ jobs:
           echo "Health check timed out"
           docker logs --tail 200 aioffice-smoke || true
           exit 1
+
