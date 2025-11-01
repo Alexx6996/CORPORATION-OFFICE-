@@ -1,14 +1,18 @@
+import logging
 # apps/backend_core/auth/bootstrap.py
 from __future__ import annotations
+
 import json
 import os
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import FastAPI
-from .router import router as auth_router
-from .oidc_config import DEFAULT as OIDC
 
-def _load_jwks() -> Dict[str, Any] | None:
+from .oidc_config import DEFAULT as OIDC
+from .router import router as auth_router
+
+
+def _load_jwks() -> dict[str, Any] | None:
     """
     Источники JWKS в порядке приоритета:
     1) OIDC_JWKS_JSON (полный JSON)
@@ -24,7 +28,7 @@ def _load_jwks() -> Dict[str, Any] | None:
             pass
     path = os.getenv("OIDC_JWKS_FILE")
     if path and os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     return None
 
@@ -38,3 +42,4 @@ def mount_auth(app: FastAPI) -> None:
         jwks = _load_jwks()
         if jwks:
             app.state.oidc_jwks = jwks  # {"keys": [...]}
+
