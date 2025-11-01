@@ -24,7 +24,8 @@ def _load_jwks() -> dict[str, Any] | None:
     if raw:
         try:
             return json.loads(raw)
-        except Exception as e:`r`n    logging.getLogger("aioffice").warning("[auth-bootstrap] suppressed exception: %s", e)
+        except Exception as e:
+            logging.getLogger("aioffice").warning("[auth-bootstrap] suppressed exception: %s", e)
     path = os.getenv("OIDC_JWKS_FILE")
     if path and os.path.exists(path):
         with open(path, encoding="utf-8") as f:
@@ -41,6 +42,7 @@ def mount_auth(app: FastAPI) -> None:
         jwks = _load_jwks()
         if jwks:
             app.state.oidc_jwks = jwks  # {"keys": [...]}
+
 
 
 
