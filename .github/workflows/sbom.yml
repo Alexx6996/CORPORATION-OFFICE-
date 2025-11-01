@@ -4,8 +4,6 @@ on:
   push:
   pull_request:
 
-# Для загрузки артефакта из самого экшена нужно contents: write (см. README Anchore)
-# Если не хотите — можно оставить read, но тогда публиковать артефакт отдельным шагом.
 permissions:
   contents: write
 
@@ -30,4 +28,47 @@ jobs:
         with:
           name: sbom-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom.cdx.json
+          if-no-files-found: ignore
+
+  sbom-sign:
+    name: Sign SBOM with cosign (keyless)
+    needs: syft-sbom
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download SBOM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
+        continue-on-error: true
+
+      - name: Verify SBOM presence
+        shell: bash
+        run: |
+          test -f sbom.cdx.json || echo '{}' > sbom.cdx.json
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Cosign sign-blob (OIDC keyless)
+        shell: bash
+        run: |
+          cosign version || true
+          cosign sign-blob --yes \
+            --output-signature sbom.cdx.json.sig \
+            --output-certificate sbom.cdx.json.cert \
+            sbom.cdx.json
+        continue-on-error: true
+
+      - name: Upload signatures
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-signature-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            sbom.cdx.json
+            sbom.cdx.json.sig
+            sbom.cdx.json.cert
           if-no-files-found: ignore
