@@ -9,7 +9,8 @@ permissions:
   packages: write
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group
+  id-token: write: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -130,3 +131,24 @@ jobs:
           name: Release v${{ steps.meta.outputs.version }}
           generate_release_notes: true
 
+
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Cosign images (keyless OIDC)
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }}
+          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ github.sha }}
+
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Verify cosign signature (latest)
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: cosign verify ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
