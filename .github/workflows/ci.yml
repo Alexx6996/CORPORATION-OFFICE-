@@ -16,9 +16,6 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -53,9 +50,6 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     needs: test
     permissions:
       contents: read
@@ -110,9 +104,6 @@ jobs:
 
   docker-smoke:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     needs: docker-build
     steps:
       - name: Login to GHCR
@@ -169,9 +160,6 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     needs: docker-build
     permissions:
       contents: write
@@ -225,6 +213,7 @@ jobs:
           name: trivy-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: trivy-image.sarif
           if-no-files-found: ignore
+
 
 
 
