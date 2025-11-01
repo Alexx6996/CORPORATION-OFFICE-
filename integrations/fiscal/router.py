@@ -1,11 +1,12 @@
 # integrations/fiscal/router.py
-from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel
-import yaml
 from pathlib import Path
 
+import yaml
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+
 # Общая зависимость авторизации (OIDC или аварийный Basic)
-from apps.backend_core.auth.oidc_verifier import get_current_user, AuthUser  # type: ignore
+from apps.backend_core.auth.oidc_verifier import AuthUser, get_current_user  # type: ignore
 
 router = APIRouter(prefix="/fiscal", tags=["fiscal"])
 

@@ -1,10 +1,10 @@
 # tests/test_fiscal.py
-import os
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 # Монтируем fiscal-роутер (использует общую зависимость авторизации)
 from integrations.fiscal.router import router as fiscal_router
+
 
 def make_app():
     app = FastAPI()

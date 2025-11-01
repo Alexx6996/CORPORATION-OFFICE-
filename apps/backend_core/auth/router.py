@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
-from .oidc_verifier import get_current_user, AuthUser
+
+from .oidc_verifier import AuthUser, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

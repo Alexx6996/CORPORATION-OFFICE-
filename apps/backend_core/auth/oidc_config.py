@@ -1,7 +1,9 @@
 # apps/backend_core/auth/oidc_config.py
 from __future__ import annotations
-from dataclasses import dataclass
+
 import os
+from dataclasses import dataclass
+
 
 @dataclass(frozen=True)
 class OIDCConfig:
@@ -17,7 +19,7 @@ class OIDCConfig:
     rollback_to_basic: bool = False
 
     @staticmethod
-    def from_env(prefix: str = "OIDC_") -> "OIDCConfig":
+    def from_env(prefix: str = "OIDC_") -> OIDCConfig:
         get = os.getenv
         enabled = (get(f"{prefix}ENABLED", "false").lower() == "true")
         return OIDCConfig(

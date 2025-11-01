@@ -2,10 +2,15 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, HTTPBasic, HTTPBasicCredentials
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBasic,
+    HTTPBasicCredentials,
+    HTTPBearer,
+)
 
 from .oidc_config import DEFAULT as OIDC
 
@@ -13,10 +18,10 @@ from .oidc_config import DEFAULT as OIDC
 _bearer = HTTPBearer(auto_error=False)
 _basic = HTTPBasic(auto_error=False)
 
-class AuthUser(Dict[str, Any]):
+class AuthUser(dict[str, Any]):
     """Простая модель пользователя на базе клеймов/учётки."""
 
-def _basic_auth(creds: Optional[HTTPBasicCredentials]) -> AuthUser:
+def _basic_auth(creds: HTTPBasicCredentials | None) -> AuthUser:
     if creds is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Basic credentials required")
     user = os.getenv("BASICAUTH_USER", "")
@@ -27,12 +32,12 @@ def _basic_auth(creds: Optional[HTTPBasicCredentials]) -> AuthUser:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Basic credentials")
     return AuthUser(sub=creds.username, auth="basic")
 
-def _oidc_auth(token: Optional[HTTPAuthorizationCredentials]) -> AuthUser:
+def _oidc_auth(token: HTTPAuthorizationCredentials | None) -> AuthUser:
     if token is None or token.scheme.lower() != "bearer":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bearer token required")
     # Жёсткий контракт: когда OIDC включён — проверяем JWT через python-jose и JWKS.
     try:
-        from jose import jwk, jwt
+        from jose import jwt
         from jose.utils import base64url_decode  # noqa: F401
     except Exception as e:  # jose не установлен
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="OIDC not available (jose missing)") from e
@@ -47,13 +52,13 @@ def _oidc_auth(token: Optional[HTTPAuthorizationCredentials]) -> AuthUser:
     # NOTE: чтобы не тянуть сеть в рантайме зависимости, ожидаем, что приложение
     # заполняет кэш JWKS в app.state. Если кэша нет — 503.
     # app.state.oidc_jwks = {"keys": [...]}
-    def _get_jwks_from_request(req: Request) -> Dict[str, Any]:
+    def _get_jwks_from_request(req: Request) -> dict[str, Any]:
         jwks = getattr(req.app.state, "oidc_jwks", None)
         if not jwks:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="JWKS cache not loaded")
         return jwks
 
-    def _verify_with_jwks(req: Request, tok: str) -> Dict[str, Any]:
+    def _verify_with_jwks(req: Request, tok: str) -> dict[str, Any]:
         headers = jwt.get_unverified_header(tok)
         kid = headers.get("kid")
         jwks = _get_jwks_from_request(req)
@@ -82,8 +87,8 @@ def _oidc_auth(token: Optional[HTTPAuthorizationCredentials]) -> AuthUser:
 
 async def get_current_user(
     request: Request,
-    bearer: Optional[HTTPAuthorizationCredentials] = Depends(_bearer),
-    basic: Optional[HTTPBasicCredentials] = Depends(_basic),
+    bearer: HTTPAuthorizationCredentials | None = Depends(_bearer),
+    basic: HTTPBasicCredentials | None = Depends(_basic),
 ) -> AuthUser:
     """
     Единая точка входа авторизации:

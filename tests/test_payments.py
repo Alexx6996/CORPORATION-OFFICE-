@@ -1,10 +1,10 @@
 # tests/test_payments.py
-import os
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 # Монтируем только payments-роутер (он тянет общую зависимость авторизации)
 from integrations.payments.router import router as payments_router
+
 
 def make_app():
     app = FastAPI()

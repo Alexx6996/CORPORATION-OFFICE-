@@ -1,9 +1,9 @@
 # integrations/payments/router.py
-from fastapi import APIRouter, HTTPException, Request, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 
 # Общая зависимость авторизации (OIDC либо аварийный Basic)
-from apps.backend_core.auth.oidc_verifier import get_current_user, AuthUser
+from apps.backend_core.auth.oidc_verifier import AuthUser, get_current_user
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 

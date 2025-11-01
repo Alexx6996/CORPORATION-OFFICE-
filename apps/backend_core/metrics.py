@@ -1,7 +1,13 @@
 # apps/backend_core/metrics.py
 from fastapi import APIRouter, Response
-from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, generate_latest, PROCESS_COLLECTOR, PLATFORM_COLLECTOR
-from prometheus_client import Counter
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    PLATFORM_COLLECTOR,
+    PROCESS_COLLECTOR,
+    CollectorRegistry,
+    Counter,
+    generate_latest,
+)
 
 router = APIRouter()
 

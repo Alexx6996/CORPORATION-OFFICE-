@@ -1,10 +1,10 @@
 # tests/test_auth.py
-import os
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 # Монтируем только auth-модуль
 from apps.backend_core.auth.bootstrap import mount_auth
+
 
 def make_app():
     app = FastAPI()
