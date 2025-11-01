@@ -60,3 +60,28 @@ jobs:
 
       - name: Build and push image
         run: docker buildx build -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }} -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ github.sha }} --provenance=true --sbom=true --push .
+  docker-smoke:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - name: Pull image (latest)
+        run: docker pull ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+
+      - name: Run container
+        run: |
+          docker run -d --rm --name aioffice-smoke -p 8181:8181 ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+          sleep 5
+
+      - name: Check /health
+        run: |
+          curl -sf http://127.0.0.1:8181/health
+          echo "OK"
+
+      - name: Logs (last 100 lines)
+        if: always()
+        run: docker logs --tail 100 aioffice-smoke || true
+
+      - name: Stop
+        if: always()
+        run: docker stop aioffice-smoke || true
+
