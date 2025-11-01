@@ -1,19 +1,14 @@
-# CI toolchain
+# --- TEST/LINT TOOLS ---
+pytest
 ruff
 bandit
 
-# Tests
-pytest
-pytest-cov
-httpx
-
-# App deps (минимум для юнит-тестов роутеров)
+# --- APP RUNTIME (минимум, чтобы импорты проходили в тестах) ---
 fastapi
 uvicorn
-python-jose[cryptography]
-
-pyyaml
-
+httpx
+PyYAML
 prometheus-client
-
 alembic
+python-jose[cryptography]
+redis
