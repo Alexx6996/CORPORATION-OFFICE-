@@ -10,6 +10,12 @@ START_TIME = time.time()
 
 app = FastAPI(title=APP_NAME)
 
+@app.get("/healthz")
+@app.get("/health")
+def healthz():
+    return {"status": "ok"}
+
+
 # -------------------------
 # /health : liveness probe
 # -------------------------
@@ -151,6 +157,4 @@ except Exception as _e:
 def healthz():
     return {"status": "ok"}
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+
