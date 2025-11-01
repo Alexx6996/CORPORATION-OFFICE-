@@ -1,5 +1,5 @@
 # Base image: Python 3.11 slim
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Disable buffering for Python logs
 ENV PYTHONUNBUFFERED=1
