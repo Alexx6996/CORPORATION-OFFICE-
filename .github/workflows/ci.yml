@@ -35,6 +35,15 @@ jobs:
 
       - name: Bandit
         run: bandit -r . -x .venv -ll -b .bandit-baseline.json
+      - name: pip-audit
+        run: |
+          pip-audit -r requirements.txt -f cyclonedx -o pip-audit.json || true
+      - name: Upload pip-audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: pip-audit.json
+          if-no-files-found: ignore
 
       - name: Pytest
         run: pytest -q
@@ -169,3 +178,4 @@ jobs:
           tag_name: v${{ steps.meta.outputs.version }}
           name: Release v${{ steps.meta.outputs.version }}
           generate_release_notes: true
+
