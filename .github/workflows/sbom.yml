@@ -4,8 +4,10 @@ on:
   push:
   pull_request:
 
+# Для загрузки артефакта из самого экшена нужно contents: write (см. README Anchore)
+# Если не хотите — можно оставить read, но тогда публиковать артефакт отдельным шагом.
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   syft-sbom:
@@ -16,10 +18,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Syft generate SBOM (fs)
-        uses: anchore/syft-action@v1
+        uses: anchore/sbom-action@v0
         with:
-          directory: .
-          output: cyclonedx-json=sbom.cdx.json
+          path: .
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
         continue-on-error: true
 
       - name: Upload SBOM artifact
