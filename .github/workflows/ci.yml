@@ -88,17 +88,29 @@ jobs:
         run: |
           mkdir -p sbom
           docker buildx imagetools inspect ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }} --format "{{json .SBOM }}" | jq -r . > sbom/sbom.json || true
+      - name: Export SBOM (cyclonedx)
+        shell: bash
+        run: |
+          mkdir -p sbom
+          docker buildx imagetools inspect ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }} --format "{{json .SBOM }}" | jq -r . > sbom/sbom.json || true
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-${{ steps.meta.outputs.version }}
+          name: sbom-${{ steps.meta.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: sbom/sbom.json
+          if-no-files-found: ignore
+          overwrite: true
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ steps.meta.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom/sbom.json
           if-no-files-found: ignore
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-${{ steps.meta.outputs.version }}
+          name: sbom-${{ steps.meta.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom/sbom.json
           if-no-files-found: ignore
   docker-smoke:
@@ -177,6 +189,8 @@ jobs:
           tag_name: v${{ steps.meta.outputs.version }}
           name: Release v${{ steps.meta.outputs.version }}
           generate_release_notes: true
+
+
 
 
 
