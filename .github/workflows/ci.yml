@@ -8,16 +8,14 @@ permissions:
   contents: read
   packages: write
 
-jobs:
+concurrency:`r`n  group: ci-${{ github.ref }}`r`n  cancel-in-progress: true`r`n`r`njobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+        uses: actions/setup-python@v5`r`n        with:`r`n          python-version: "3.11"`r`n          cache: "pip"
 
       - name: Install deps
         run: |
@@ -25,7 +23,7 @@ jobs:
           pip install -r requirements-ci.txt
 
       - name: Ruff
-        run: ruff check . --output-format=github --ignore E501,B008 --line-length 120 --target-version py311
+        run: ruff check . --output-format=github
 
       - name: Bandit
         run: bandit -r . -x .venv -ll -b .bandit-baseline.json
@@ -98,3 +96,6 @@ jobs:
           echo "== Container logs =="
           docker logs --tail 200 aioffice-smoke || true
           exit 1
+
+
+
