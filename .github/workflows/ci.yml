@@ -1,12 +1,15 @@
 name: CI
 
 on:
-permissions:`r`n  contents: read`r`n  packages: write`r`n  push:
+  push:
     branches: ["**"]
   pull_request:
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  test:
+test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +45,7 @@ jobs:
         with:
           context: .
           push: false
+
 
 
 
