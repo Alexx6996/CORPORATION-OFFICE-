@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements-ci.txt
 
       - name: Ruff
-        run: ruff . --format=github
+        run: ruff check . --output-format=github
 
       - name: Bandit
         run: bandit -r . -x .venv -ll
@@ -42,3 +42,4 @@ jobs:
         with:
           context: .
           push: false
+
