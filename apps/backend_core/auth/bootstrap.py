@@ -1,8 +1,8 @@
 from __future__ import annotations
-import logging
-# apps/backend_core/auth/bootstrap.py
 
+# apps/backend_core/auth/bootstrap.py
 import json
+import logging
 import os
 from typing import Any
 
