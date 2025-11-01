@@ -7,14 +7,13 @@ on:
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 concurrency:
-  group
-  id-token: write: ci-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  test:
+jobs:test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -152,3 +151,4 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: cosign verify ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+
