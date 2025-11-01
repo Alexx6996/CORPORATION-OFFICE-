@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  push:
+permissions:`r`n  contents: read`r`n  packages: write`r`n  push:
     branches: ["**"]
   pull_request:
 
@@ -42,6 +42,10 @@ jobs:
         with:
           context: .
           push: false
+
+
+
+
 
 
 
