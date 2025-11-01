@@ -64,6 +64,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker-build
     steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Pull image (latest)
         run: docker pull ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
 
@@ -84,4 +91,5 @@ jobs:
       - name: Stop
         if: always()
         run: docker stop aioffice-smoke || true
+
 
