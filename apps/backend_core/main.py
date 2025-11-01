@@ -10,11 +10,11 @@ START_TIME = time.time()
 
 app = FastAPI(title=APP_NAME)
 
+
 @app.get("/healthz")
 @app.get("/health")
-def healthz():
+def _health_check():
     return {"status": "ok"}
-
 
 # -------------------------
 # /health : liveness probe
@@ -153,8 +153,4 @@ try:
 except Exception as _e:
     print(f"[fiscal-bootstrap] skipped: {_e}")
 # --- /AUTO-INJECT ---
-@app.get("/healthz")
-def healthz():
-    return {"status": "ok"}
-
 
