@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.abspath("."))
 """
 AIOFFICE TEST POLICY (applies to ALL tests in this repo)
 
@@ -30,3 +32,4 @@ def http_mock():
     """
     with requests_mock.Mocker() as m:
         yield m
+
