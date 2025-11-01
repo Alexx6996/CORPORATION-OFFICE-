@@ -2,7 +2,7 @@ name: GHCR Cleanup
 
 on:
   schedule:
-    - cron: "0 3 * * 0"   # раз в неделю, 03:00 UTC
+    - cron: "0 3 * * 0"   # еженедельно, 03:00 UTC
   workflow_dispatch:
 
 permissions:
