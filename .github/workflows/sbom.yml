@@ -1,0 +1,30 @@
+name: SBOM (Syft)
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  syft-sbom:
+    name: Syft SBOM (fs, CycloneDX)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Syft generate SBOM (fs)
+        uses: anchore/syft-action@v1
+        with:
+          directory: .
+          output: cyclonedx-json=sbom.cdx.json
+        continue-on-error: true
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.run_id }}-${{ github.run_attempt }}
+          path: sbom.cdx.json
+          if-no-files-found: ignore
