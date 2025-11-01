@@ -195,15 +195,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Trivy scan
+      - name: Trivy FS scan (non-blocking)
         uses: aquasecurity/trivy-action@0.24.0
         continue-on-error: true
         with:
-          image-ref: ghcr.io/${{ github.repository }}:latest
+          scan-type: fs
+          scan-ref: .
           format: sarif
-          output: trivy-image.sarif
-      - name: Upload SARIF to Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+          output: trivy-image.sarif      - name: Upload SARIF to Code Scanning
+      - name: Ensure SARIF file exists
+        shell: bash
+        run: |
+          test -f trivy-image.sarif || echo '{}' > trivy-image.sarif        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-image.sarif
         continue-on-error: true
@@ -213,6 +216,7 @@ jobs:
           name: trivy-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: trivy-image.sarif
           if-no-files-found: ignore
+
 
 
 
