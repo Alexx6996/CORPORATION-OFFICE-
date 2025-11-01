@@ -1,17 +1,14 @@
 # CORPORATION / OFFICE
 
-Минимальный backend на **FastAPI** + **Redis**.
+[![CI](https://github.com/Alexx6996/CORPORATION-OFFICE-/actions/workflows/ci.yml/badge.svg)](https://github.com/Alexx6996/CORPORATION-OFFICE-/actions/workflows/ci.yml)
 
-## Системные требования
-- Windows 11 Pro
-- PowerShell 7+
-- Docker Desktop
-- Python 3.11 (виртуальное окружение: `.venv`)
-- Планировщик задач Windows (задача: `AIOFFICE\Backend`)
+Локальная многоагентная платформа ИИ c FastAPI-ядром, наблюдаемостью (`/healthz`, `/metrics`), CI/CD и безопасной аутентификацией (OIDC с аварийным откатом на BasicAuth).
 
-## Первая настройка (однократно)
+## Требования
+- Windows 10/11, PowerShell 7+
+- Docker Desktop (WSL2 backend)
+- Python 3.11 (для локальной разработки)
+
+## Быстрый старт (staging)
 ```powershell
-# если еще не создано окружение и зависимости:
-python -V
-pip -V
-pip install -r requirements.txt
+docker compose -f docker-compose.staging.yml up -d --build

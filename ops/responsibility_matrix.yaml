@@ -1,27 +1,62 @@
-# RACI матрица для CORPORATION / OFFICE
-# R=Responsible, A=Accountable, C=Consulted, I=Informed
+# Responsibility Matrix — CORPORATION / OFFICE
 
-items:
-  - task: "Prod релиз (выполнение по prod_release_checklist.md)"
-    roles: { User: "R", Administrator: "A", DomainOwners: "C", Security: "I" }
+roles:
+  User:
+    description: Ежедневная работа с системой, смоки, запуск по чеклистам
+  Administrator:
+    description: Операции/инфраструктура, деплой/rollback, бэкапы/DR, доступы
+  DomainOwner:
+    description: Владелец доменного агента/интеграции (финансы/фискалка/юрист/и т.д.)
+  Security:
+    description: Политики безопасности, аудит, ротация секретов, инциденты
+  Developer:
+    description: Разработка/тестирование, исправление багов, миграции
 
-  - task: "Инцидент S0 (недоступность/утечка)"
-    roles: { User: "I", Administrator: "A", Security: "R", DomainOwners: "C" }
+areas:
+  observability:
+    owner: Administrator
+    approvers: [Security]
+    runbooks: [ "ops/runbook.md", "observability/alerts.yaml" ]
+  auth:
+    owner: Developer
+    approvers: [Security, Administrator]
+    docs: [ "adr/ADR-0001-oidc-migration.md", "docs/frontend_oidc_migration.md" ]
+  payments:
+    owner: DomainOwner
+    approvers: [Security, Administrator]
+    docs: [ "integrations/payments/payments_integration_plan.md" ]
+  fiscalization:
+    owner: DomainOwner
+    approvers: [Security]
+    docs: [ "integrations/fiscal/receipt_model.yaml" ]
+  backups_dr:
+    owner: Administrator
+    approvers: [Security]
+    docs: [ "backup/backup_policy.yaml", "backup/dr_plan.yaml" ]
+  releases:
+    owner: Administrator
+    approvers: [User]
+    docs: [ "prod_release_checklist.md", "staging_checklist.md", "release_acceptance_checklist.md" ]
 
-  - task: "Плановая ротация секретов/сертов"
-    roles: { User: "I", Administrator: "R", Security: "A", DomainOwners: "C" }
-
-  - task: "Миграции БД (alembic upgrade head)"
-    roles: { User: "C", Administrator: "R", Security: "I", DomainOwners: "I" }
-
-  - task: "Юр-обновления (политика/оферта)"
-    roles: { User: "R", Administrator: "I", DomainOwners: "C", Security: "I" }
-
-  - task: "Изменения интеграций (платежи/фискалка)"
-    roles: { User: "R", Administrator: "C", DomainOwners: "A", Security: "I" }
-
-  - task: "DR-тест и бэкапы"
-    roles: { User: "I", Administrator: "R", Security: "C", DomainOwners: "I" }
-
-  - task: "Observability/алерты (SLO/SLA)"
-    roles: { User: "R", Administrator: "C", Security: "A", DomainOwners: "I" }
+raci:
+  # Примеры (RACI: Responsible/Accountable/Consulted/Informed)
+  deploy_staging:
+    R: Administrator
+    A: Administrator
+    C: Developer
+    I: User
+  release_prod:
+    R: Administrator
+    A: Administrator
+    C: Security
+    I: User
+  rotate_secrets:
+    R: Security
+    A: Security
+    C: Administrator
+    I: Developer
+  incident_postmortem:
+    R: Administrator
+    A: Security
+    C: Developer
+    I: User

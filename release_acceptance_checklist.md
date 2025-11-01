@@ -1,31 +1,38 @@
 # RELEASE ACCEPTANCE CHECKLIST — CORPORATION / OFFICE
 
-## 1. Качество и безопасность
-- [ ] Ruff/bandit/pytest в CI — PASS
-- [ ] Статическая проверка секретов — PASS (нет утечек)
-- [ ] Линтеры/политики (security/code_security_policy.md) — соблюдены
+## 1) Предрелиз
+- [ ] Версия: соответствует `version.txt` и тегу `vX.Y.Z`
+- [ ] CI: зелёный (ruff, bandit, pytest, docker build)
+- [ ] Чейнджлог/релизные заметки подготовлены
+- [ ] Бэкапы в актуальном состоянии (см. backup/backup_policy.yaml)
+- [ ] DR-план актуален (backup/dr_plan.yaml) — RTO/RPO подтверждены
 
-## 2. Наблюдаемость
-- [ ] /healthz и /metrics — OK на staging
-- [ ] Логи в JSON содержат trace_id/span_id
-- [ ] Алерты (observability/alerts.yaml) — без критов
+## 2) Staging
+- [ ] Пройден `staging_checklist.md` (все пункты OK)
+- [ ] Alembic миграции проверены (`alembic upgrade head` на staging)
+- [ ] Смоки API: `/healthz`=200, `/metrics`=200, `/auth/whoami`=200 (OIDC/или Basic fallback)
+- [ ] Интеграции: payments (sandbox) → 200 `{status: created}`
 
-## 3. Данные и миграции
-- [ ] Alembic migrations — применяются на staging (upgrade head)
-- [ ] DR-план и бэкапы актуальны (backup/, C:\Secure\Backups\)
+## 3) Прод деплой
+- [ ] Окно релиза и план отката согласованы (rollback образ/ENV готовы)
+- [ ] Деплой образа X.Y.Z выполнен
+- [ ] Alembic: `upgrade head` выполнен на прод
+- [ ] Health&Metrics: `/healthz`=200, `/metrics`=200
+- [ ] Логи без крит-ошибок за 15 минут после релиза
 
-## 4. Интеграции
-- [ ] Payments sandbox: /payments/health и /payments/charge — PASS (тесты)
-- [ ] Фискальный контракт: receipt_model.yaml — заполнен и согласован (draft OK)
+## 4) Auth (Prod)
+- [ ] OIDC включён (`OIDC_ENABLED=true`, `AUTH_ROLLBACK_TO_BASIC=false`) ИЛИ подтверждён временный fallback
+- [ ] Тестовый вход через фронт: PASS
+- [ ] `/auth/whoami` возвращает `auth=oidc` (или `basic` при согласованном откате)
 
-## 5. Юр-контур
-- [ ] legal/legal_draft.md — базовый черновик готов
-- [ ] Политика приватности/оферта — вынесены в документ, готовы к юр. ревизии
+## 5) Наблюдение пост-релиза
+- [ ] 2 часа: 5xx < 1%, latency в SLO (alerts.yaml)
+- [ ] 24 часа: инцидентов S0/S1 нет
 
-## 6. Операции (Ops)
-- [ ] ops/runbook.md — заполнен (старт/стоп, миграции, откат, daily checks)
-- [ ] ops/secrets_rotation_schedule.yaml — даты и статусы актуальны
+## 6) Юр/комплаенс
+- [ ] legal/legal_draft.md актуализирован
+- [ ] Политика кода/security согласованы (security/code_security_policy.md)
 
 ## Итог
-- [ ] Готов к prod-релизу по prod_release_checklist.md
-Подписи: User ______ / Administrator ______ / Дата: ______
+- [ ] Релиз принят. Версия: ______ Дата/время: ______
+Подписи: User ______ / Administrator ______ / Security ______
