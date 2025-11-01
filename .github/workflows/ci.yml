@@ -13,7 +13,8 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:test:
+jobs:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +45,7 @@ jobs:test:
     permissions:
       contents: read
       packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -66,6 +68,17 @@ jobs:test:
       - name: Build and push image
         run: docker buildx build -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }} -t ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ github.sha }} --provenance=true --sbom=true --push .
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Cosign images (keyless OIDC)
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }}
+          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ github.sha }}
+
   docker-smoke:
     runs-on: ubuntu-latest
     needs: docker-build
@@ -79,6 +92,14 @@ jobs:test:
 
       - name: Pull image (latest)
         run: docker pull ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Verify cosign signature (latest)
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: cosign verify ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
 
       - name: Run container
         run: |
@@ -109,6 +130,7 @@ jobs:test:
       - name: Stop
         if: always()
         run: docker stop aioffice-smoke || true
+
   release:
     runs-on: ubuntu-latest
     needs: docker-build
@@ -129,26 +151,3 @@ jobs:test:
           tag_name: v${{ steps.meta.outputs.version }}
           name: Release v${{ steps.meta.outputs.version }}
           generate_release_notes: true
-
-
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3
-
-      - name: Cosign images (keyless OIDC)
-        env:
-          COSIGN_EXPERIMENTAL: "true"
-        run: |
-          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
-          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }}
-          cosign sign --yes ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ github.sha }}
-
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3
-
-      - name: Verify cosign signature (latest)
-        env:
-          COSIGN_EXPERIMENTAL: "true"
-        run: cosign verify ghcr.io/alexx6996/corporation-office/aioffice-staging-app:latest
-
