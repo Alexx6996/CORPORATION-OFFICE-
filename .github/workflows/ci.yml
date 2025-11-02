@@ -39,7 +39,7 @@ jobs:
         run: |
           pip-audit -r requirements.txt -f cyclonedx -o pip-audit.json || true
       - name: Upload pip-audit artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: pip-audit-${{ github.run_id }}-${{ github.run_attempt }}
           path: pip-audit.json
@@ -95,7 +95,7 @@ jobs:
           docker buildx imagetools inspect ghcr.io/alexx6996/corporation-office/aioffice-staging-app:${{ steps.meta.outputs.version }} --format "{{json .SBOM }}" | jq -r . > sbom/sbom.json || true
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sbom-${{ steps.meta.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom/sbom.json
@@ -214,7 +214,7 @@ jobs:
           sarif_file: trivy-image.sarif
         continue-on-error: true
       - name: Upload Trivy SARIF
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: trivy-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: trivy-image.sarif
@@ -259,7 +259,7 @@ jobs:
           path: .
           format: cyclonedx-json
           output-file: sbom-cyclonedx.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: sbom-cyclonedx-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom-cyclonedx.json
