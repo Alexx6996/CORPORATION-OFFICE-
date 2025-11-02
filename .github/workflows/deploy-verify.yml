@@ -18,5 +18,5 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
+          OWNER="${{ github.repository_owner }}"; REPO="${{ github.event.repository.name }}"; OWNER_LC="${OWNER,,}"; REPO_LC="${REPO,,}"; REPO_ND="${REPO_LC%-}"; IMAGE="ghcr.io/${OWNER_LC}/${REPO_ND}:${{ github.sha }}"
           cosign verify --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/ci.yml@refs/(heads|tags)/.*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE

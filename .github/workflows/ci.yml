@@ -222,7 +222,7 @@ jobs:
 
 
   publish_sign:
-    needs: [ build_and_smoke ]
+    needs: [ docker-smoke ]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -238,7 +238,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build & Push image
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
+          OWNER="${{ github.repository_owner }}"; REPO="${{ github.event.repository.name }}"; OWNER_LC="${OWNER,,}"; REPO_LC="${REPO,,}"; REPO_ND="${REPO_LC%-}"; IMAGE="ghcr.io/${OWNER_LC}/${REPO_ND}:${{ github.sha }}"; echo "IMAGE_REF=$IMAGE" >> $GITHUB_ENV
           docker build -t $IMAGE .
           docker push $IMAGE
           echo "IMAGE_REF=$IMAGE" >> $GITHUB_ENV
@@ -250,7 +250,7 @@ jobs:
         run: |
           cosign sign --yes ${{ env.IMAGE_REF }}
   sbom:
-    needs: [ build_and_smoke ]
+    needs: [ docker-smoke ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -264,7 +264,7 @@ jobs:
           name: sbom-cyclonedx-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom-cyclonedx.json
   trivy:
-    needs: [ build_and_smoke ]
+    needs: [ docker-smoke ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -277,7 +277,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
       - name: Build image for scan
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
+          OWNER="${{ github.repository_owner }}"; REPO="${{ github.event.repository.name }}"; OWNER_LC="${OWNER,,}"; REPO_LC="${REPO,,}"; REPO_ND="${REPO_LC%-}"; IMAGE="ghcr.io/${OWNER_LC}/${REPO_ND}:${{ github.sha }}"; echo "IMAGE_REF=$IMAGE" >> $GITHUB_ENV
           docker build -t $IMAGE .
           echo "IMAGE_REF=$IMAGE" >> $GITHUB_ENV
       - name: Trivy image scan
