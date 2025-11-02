@@ -222,7 +222,7 @@ jobs:
 
 
   publish_sign:
-    needs: [ build_and_smoke ]
+    needs: [ docker-smoke ]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -250,7 +250,7 @@ jobs:
         run: |
           cosign sign --yes ${{ env.IMAGE_REF }}
   sbom:
-    needs: [ build_and_smoke ]
+    needs: [ docker-smoke ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -264,7 +264,7 @@ jobs:
           name: sbom-cyclonedx-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom-cyclonedx.json
   trivy:
-    needs: [ build_and_smoke ]
+    needs: [ docker-smoke ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
