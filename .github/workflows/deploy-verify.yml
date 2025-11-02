@@ -19,4 +19,4 @@ jobs:
           COSIGN_EXPERIMENTAL: "true"
         run: |
           IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
-          cosign verify $IMAGE
+          cosign verify --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/ci.yml@refs/(heads|tags)/.*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE
