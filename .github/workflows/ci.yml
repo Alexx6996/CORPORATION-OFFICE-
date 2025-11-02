@@ -196,7 +196,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Trivy FS scan (non-blocking)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.33.1
         continue-on-error: true
         with:
           args: --disable-telemetry
@@ -269,7 +269,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Trivy
-        uses: aquasecurity/trivy-action@0.22.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'fs'
           format: 'table'
@@ -281,7 +281,7 @@ jobs:
           docker build -t $IMAGE .
           echo "IMAGE_REF=$IMAGE" >> $GITHUB_ENV
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.22.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ env.IMAGE_REF }}
           format: 'table'
