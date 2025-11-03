@@ -1,0 +1,26 @@
+name: Probe Smoke
+on: { pull_request: { branches: [ main ] } }
+jobs:
+  smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install minimal deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi uvicorn prometheus-client
+      - name: Run uvicorn (bg)
+        run: |
+          start /B python -m uvicorn apps.backend_core.main:app --host 127.0.0.1 --port 8181 --log-level warning
+          ping -n 5 127.0.0.1 >NUL
+      - name: Curl /healthz
+        shell: bash
+        run: |
+          curl -sS -o /dev/null -w "%{http_code}\n" --noproxy "*" http://127.0.0.1:8181/healthz | grep -q "^200$"
+      - name: Curl /ready (allow 200/503)
+        shell: bash
+        run: |
+          code=$(curl -sS -o /dev/null -w "%{http_code}\n" --noproxy "*" http://127.0.0.1:8181/ready)
+          if [ "$code" != "200" ] && [ "$code" != "503" ]; then echo "Unexpected code: $code"; exit 1; fi
