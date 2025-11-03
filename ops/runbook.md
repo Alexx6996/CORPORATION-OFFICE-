@@ -85,3 +85,12 @@
 ## Завершение дня
 - Выполнить `ops\stop-day.ps1`: остановка службы, проверка Redis, итоговый статус.
 - Архив аудита по дням сохранять в `observability\`.
+
+## Health checks — canon
+- Backend listens on **127.0.0.1:8181**.
+- For local diagnostics use **-NoProxy** to avoid false 503 from system proxy:
+  - `Invoke-WebRequest -NoProxy http://127.0.0.1:8181/healthz`
+  - `curl.exe --noproxy "*" http://127.0.0.1:8181/healthz`
+- Liveness: **/healthz = 200** (no deps).
+- Readiness: **/ready** checks Redis via TCP (6379).
+- Metrics: **/metrics** (Prometheus).

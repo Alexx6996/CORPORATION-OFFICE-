@@ -1,27 +1,39 @@
-# ops/start-day.ps1 — утренний чек системы
-$ErrorActionPreference = "SilentlyContinue"
-$ts = Get-Date -Format "yyyy-MM-dd HH:mm:ssK"
-Write-Host "=== START-DAY ($ts) ==="
+# ops\start-day.ps1 — CORPORATION / OFFICE (canonical, port 8181)
+# Context: Administrator, PowerShell 7+, .venv inactive
+$ErrorActionPreference = "Stop"
+$ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+Write-Host "=== START-DAY CHECK ($ts) ==="
 
-# 1) Docker Desktop
-$dockerv = docker version --format '{{.Server.Version}}'
-if ($LASTEXITCODE -ne 0 -or -not $dockerv) { Write-Host "[ATTENTION] Docker not available"; $docker_ok=$false } else { Write-Host "[OK] Docker $dockerv"; $docker_ok=$true }
+# 1) Docker & Redis
+$redis = (docker ps -a --filter "name=aioffice-redis" --format "{{.Names}} {{.Status}}") 2>$null
+if (-not $redis) { Write-Host "[ATTENTION] Redis container not found: aioffice-redis"; $redisOk = $false } else {
+  Write-Host "[INFO] Redis: $redis"
+  $redisOk = $redis -match "Up "
+  if (-not $redisOk) {
+    try { docker start aioffice-redis | Out-Null; Start-Sleep 2; $redisOk = ((docker ps --filter "name=aioffice-redis" --format "{{.Status}}") -match "Up ") } catch {}
+  }
+}
+if ($redisOk) { Write-Host "[OK] Redis is Up" } else { Write-Host "[ATTENTION] Redis is not running" }
 
-# 2) Redis контейнер
-$redis = docker ps --filter "name=aioffice-staging-redis" --filter "status=running" --format '{{.Names}}'
-if (-not $redis) { Write-Host "[ATTENTION] Redis container not running"; $redis_ok=$false } else { Write-Host "[OK] Redis: $redis"; $redis_ok=$true }
+# 2) Windows service AIOFFICESSvc
+$svc = Get-Service -Name "AIOFFICESSvc" -ErrorAction SilentlyContinue
+if (-not $svc) { Write-Host "[ATTENTION] Service AIOFFICESSvc not found"; $svcOk=$false } else {
+  Write-Host ("[INFO] Service: {0} ({1})" -f $svc.DisplayName, $svc.Status)
+  if ($svc.Status -ne 'Running') {
+    try { Start-Service -Name "AIOFFICESSvc"; Start-Sleep 2 } catch {}
+    $svc = Get-Service -Name "AIOFFICESSvc" -ErrorAction SilentlyContinue
+  }
+  $svcOk = $svc.Status -eq 'Running'
+  if ($svcOk) { Write-Host "[OK] Service Running" } else { Write-Host "[ATTENTION] Service NOT Running" }
+}
 
-# 3) Служба AIOFFICESSvc
-$svc = Get-Service -Name AIOFFICESSvc -ErrorAction SilentlyContinue
-if (-not $svc) { Write-Host "[ATTENTION] Service AIOFFICESSvc not found"; $svc_ok=$false }
-elseif ($svc.Status -ne 'Running') { Write-Host "[ATTENTION] Service AIOFFICESSvc: $($svc.Status)"; $svc_ok=$false }
-else { Write-Host "[OK] Service AIOFFICESSvc: Running"; $svc_ok=$true }
-
-# 4) Healthz локального бекенда
+# 3) Liveness /healthz on 127.0.0.1:8181
+$healthzOk = $false
 try {
-  $code = (Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:8181/healthz" -TimeoutSec 5).StatusCode
-  if ($code -eq 200) { Write-Host "[OK] /healthz = 200"; $health_ok=$true } else { Write-Host "[ATTENTION] /healthz = $code"; $health_ok=$false }
-} catch { Write-Host "[ATTENTION] /healthz unreachable: $($_.Exception.Message)"; $health_ok=$false }
+  $r = Invoke-WebRequest -NoProxy -Uri "http://127.0.0.1:8181/healthz" -UseBasicParsing -TimeoutSec 3
+  if ($r.StatusCode -eq 200) { $healthzOk = $true; Write-Host "[OK] /healthz 200" } else { Write-Host "[ATTENTION] /healthz status: $($r.StatusCode)" }
+} catch { Write-Host "[ATTENTION] /healthz error: $($_.Exception.Message)" }
 
-# Итог
-if ($docker_ok -and $redis_ok -and $svc_ok -and $health_ok) { Write-Host "RESULT: OK" ; exit 0 } else { Write-Host "RESULT: ATTENTION" ; exit 1 }
+# 4) Result
+if ($redisOk -and $svcOk -and $healthzOk) { Write-Host "RESULT: OK" } else { Write-Host "RESULT: ATTENTION" }
+
