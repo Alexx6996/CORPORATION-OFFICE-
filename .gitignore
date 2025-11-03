@@ -18,3 +18,6 @@ observability/caddy-data/
 Thumbs.db
 .vscode/
 .idea/
+
+# local backups
+apps/backend_core/*.bak
