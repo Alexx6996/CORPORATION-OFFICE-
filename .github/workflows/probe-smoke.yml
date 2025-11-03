@@ -2,20 +2,14 @@ name: Probe Smoke
 on:
   pull_request:
     branches: [ main ]
-    paths:
-      - "apps/**"
-      - ".github/workflows/probe-smoke.yml"
 
 jobs:
   smoke:
     runs-on: windows-2025
-    timeout-minutes: 5
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -28,59 +22,44 @@ jobs:
       - name: uvicorn (bg) with logs
         shell: pwsh
         run: |
-          Set-Location ""
-          # На всякий случай добавим корень репо в PYTHONPATH
-           = "C:\work\AICORPORATION\AIOFFICE;"
-          # Запуск в фоне с редиректом логов
-           = Join-Path C:\work\AICORPORATION\AIOFFICE 'uvicorn.out.txt'
-           = Join-Path C:\work\AICORPORATION\AIOFFICE 'uvicorn.err.txt'
-          .\ops\runbook.md = Start-Process -FilePath python 
-                -ArgumentList '-m','uvicorn','apps.backend_core.main:app','--host','127.0.0.1','--port','8181','--log-level','warning' 
-                -WorkingDirectory "C:\work\AICORPORATION\AIOFFICE" -PassThru 
-                -RedirectStandardOutput  -RedirectStandardError 
-          "Started PID: "
+          $env:PYTHONPATH = (Get-Location).Path
+          $args = @('-m','uvicorn','apps.backend_core.main:app','--host','127.0.0.1','--port','8181','--log-level','info')
+          $p = Start-Process -FilePath python -ArgumentList $args -WorkingDirectory $PWD `
+               -RedirectStandardOutput uvicorn.out.log -RedirectStandardError uvicorn.err.log -PassThru
+          "Started PID: $($p.Id)"
 
-      - name: Wait for /healthz (up to 90s) + diagnostics
+      - name: Wait for /healthz (up to 45s)
         shell: pwsh
         run: |
-          Set-Location ""
-           = (Get-Date).AddSeconds(90)
-           = False
-          while((Get-Date) -lt ){
-            try {
-               = Invoke-WebRequest -NoProxy -UseBasicParsing http://127.0.0.1:8181/healthz -TimeoutSec 2
-              if(.StatusCode -eq 200){  = True; break }
-            } catch {
-              Start-Sleep -Milliseconds 500
+          $deadline = (Get-Date).AddSeconds(45)
+          $ok = $false
+          while((Get-Date) -lt $deadline){
+            if (Get-Process -Id $p.Id -ErrorAction SilentlyContinue | Where-Object { $_.HasExited }) {
+              Write-Host "uvicorn exited early. stderr tail:"; Get-Content .\uvicorn.err.log -Tail 100
+              throw "uvicorn process exited before healthz became 200"
             }
-            # если процесс умер — сразу падаем с логами
-             = Get-Process -Id (Get-Content .\uvicorn.pid 2>) -ErrorAction SilentlyContinue
-          }
-          if(-not ){
-            Write-Host "=== DIAG: process ==="
             try {
-              .\ops\runbook.md = Get-Process -Name python -ErrorAction SilentlyContinue | Where-Object { .Path -like "*Python*" }
-              .\ops\runbook.md | Select-Object Id,HasExited,StartTime,Path | Format-List
-            } catch {}
-            Write-Host "=== DIAG: netstat 8181 ==="
-            try { netstat -ano | findstr ":8181" } catch {}
-            Write-Host "=== DIAG: uvicorn.err.txt (last 100) ==="
-            try { Get-Content .\uvicorn.err.txt -ErrorAction SilentlyContinue | Select-Object -Last 100 } catch {}
-            Write-Host "=== DIAG: uvicorn.out.txt (last 50) ==="
-            try { Get-Content .\uvicorn.out.txt -ErrorAction SilentlyContinue | Select-Object -Last 50 } catch {}
-            throw "healthz did not become 200 within 90s"
+              $r = Invoke-WebRequest -NoProxy -UseBasicParsing http://127.0.0.1:8181/healthz -TimeoutSec 2
+              if($r.StatusCode -eq 200){ $ok = $true; break }
+            } catch { Start-Sleep -Milliseconds 500 }
+          }
+          if(-not $ok){
+            Write-Host "uvicorn.out.log tail:"; Get-Content .\uvicorn.out.log -Tail 100
+            Write-Host "uvicorn.err.log tail:"; Get-Content .\uvicorn.err.log -Tail 100
+            throw "healthz did not become 200 within timeout"
           }
 
       - name: Probe endpoints
         shell: pwsh
         run: |
-           = @(
-            "http://127.0.0.1:8181/healthz",
-            "http://127.0.0.1:8181/health",
-            "http://127.0.0.1:8181/ready",
-            "http://127.0.0.1:8181/version"
-          )
-          foreach( in ){
-             = Invoke-WebRequest -NoProxy -UseBasicParsing  -TimeoutSec 5
-            "{0} -> {1}" -f ,.StatusCode | Write-Host
+          foreach($p in @("/healthz","/health","/ready","/version")){
+            $rc = (curl.exe --noproxy "*" -s -o NUL -w "%{http_code}" "http://127.0.0.1:8181$p")
+            if($rc -ne "200"){ throw "$p -> $rc" } else { Write-Host "$p -> $rc" }
           }
+
+      - name: Dump logs on failure
+        if: ${{ failure() }}
+        shell: pwsh
+        run: |
+          Write-Host "=== uvicorn.out.log (tail) ==="; if(Test-Path .\uvicorn.out.log){ Get-Content .\uvicorn.out.log -Tail 200 }
+          Write-Host "=== uvicorn.err.log (tail) ==="; if(Test-Path .\uvicorn.err.log){ Get-Content .\uvicorn.err.log -Tail 200 }
