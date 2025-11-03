@@ -1,24 +1,29 @@
 name: Probe Smoke
 
 on:
-  pull_request:
+    workflow_dispatch:
+    pull_request:
     branches: ["*"]
   push:
-    branches: ["feat/mvp-ready-probes"]
+    branches: ["main"]
     paths:
       - ".github/workflows/probe-smoke.yml"
       - "apps/backend_core/**"
 
 jobs:
   smoke:
-    runs-on: windows-2025
+    runs-on:
+    workflow_dispatch:
+    windows-2025
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version:
+    workflow_dispatch:
+    "3.11"
 
       - name: Install minimal deps
         shell: pwsh
@@ -69,3 +74,4 @@ jobs:
           finally {
             if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force }
           }
+
