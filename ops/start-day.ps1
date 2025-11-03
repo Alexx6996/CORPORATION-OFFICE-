@@ -30,9 +30,10 @@ if (-not $svc) { Write-Host "[ATTENTION] Service AIOFFICESSvc not found"; $svcOk
 # 3) Liveness /healthz on 127.0.0.1:8181
 $healthzOk = $false
 try {
-  $r = Invoke-WebRequest -Uri "http://127.0.0.1:8181/healthz" -UseBasicParsing -TimeoutSec 3
+  $r = Invoke-WebRequest -NoProxy -Uri "http://127.0.0.1:8181/healthz" -UseBasicParsing -TimeoutSec 3
   if ($r.StatusCode -eq 200) { $healthzOk = $true; Write-Host "[OK] /healthz 200" } else { Write-Host "[ATTENTION] /healthz status: $($r.StatusCode)" }
 } catch { Write-Host "[ATTENTION] /healthz error: $($_.Exception.Message)" }
 
 # 4) Result
 if ($redisOk -and $svcOk -and $healthzOk) { Write-Host "RESULT: OK" } else { Write-Host "RESULT: ATTENTION" }
+
