@@ -21,3 +21,6 @@ Thumbs.db
 
 # local backups
 apps/backend_core/*.bak
+
+# local backups
+apps/backend_core/*.bak
