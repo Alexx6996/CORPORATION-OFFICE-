@@ -24,7 +24,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sbom-${{ github.run_id }}-${{ github.run_attempt }}
           path: sbom.cdx.json
@@ -64,7 +64,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload signatures
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sbom-signature-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
